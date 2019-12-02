@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 const express = require("express");
+const jwt = require("jsonwebtoken");
+const config = require('config')
 const router = express.Router();
-const bcrypt = require('bcryptjs')
+const bcrypt = require("bcryptjs");
 const { User } = require("../../models/user");
 
 //getting user
@@ -26,10 +28,16 @@ router.post("/", async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) return res.status(400).send("Invalid email or password");
 
-    const validPassword = await bcrypt.compare(password,user.password);
-    if(!validPassword) return res.status(400).send('Invalid email or password')
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword)
+      return res.status(400).send("Invalid email or password");
 
-    res.send(true);
+    const token = user.generateAuthToken();
+    //sending the generated token
+    res.send(token);
+
+
+
   } catch (e) {
     res.send(e);
   }
